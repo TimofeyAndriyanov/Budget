@@ -5,11 +5,13 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -18,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.*
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -47,6 +50,12 @@ fun TransactionInputPreview() {
 
 }
 
+object State {
+    var currentSelect = mutableStateOf(CategoryEnum.ALL)
+    val currentSum = mutableStateOf("")
+    val currentDescription = mutableStateOf("")
+}
+
 @Composable
 fun TransactionInput(
     type: TransactionType,
@@ -59,7 +68,11 @@ fun TransactionInput(
                 title = if (type.id == 1) "Расход" else "Доход",
                 save = save,
                 back = back,
-                saveEnable = false
+                saveEnable = if (type == TransactionType.CONSUMPTION) {
+                    State.currentSum.value.isNotEmpty() && State.currentDescription.value.isNotEmpty()
+                } else {
+                    State.currentSum.value.isNotEmpty()
+                }
             )
         },
          content = {
@@ -77,15 +90,18 @@ fun TransactionInput(
                          title = if (type.id == 1) "Категория" else "Источник",
                          list = if (type.id == 1) categoryList else source
                      )
-                     textInput(
+                     State.currentSum.value = textInput(
                          title = "Сумма",
-                         hint = "0 ₽"
+                         hint = "0 ₽",
+                         keyboardType = KeyboardType.Number
                      )
                      DateSelection()
-                     AnimatedVisibility(visible = type.id == 1) {
-                         textInput(
+
+                     if (type.id == 1) {
+                         State.currentDescription.value = textInput(
                              title = "На что потрачено?",
-                             hint = "Например: Яблоко"
+                             hint = "Например: Яблоко",
+                             KeyboardType.Text
                          )
                      }
                  },
@@ -150,42 +166,30 @@ fun RowScope.ItemButtonTopBar(
     textAlign: TextAlign,
     enable: Boolean
 ) {
-    Card(
-        onClick = onClick,
+    Text(
+        text = title,
+        style = TextStyle(
+            fontSize = 16.sp,
+            lineHeight = 20.sp,
+            fontFamily = FontFamily(
+                Font(R.font.roboto)
+            ),
+            fontWeight = FontWeight.Medium,
+            letterSpacing = 0.25.sp,
+            color = if (enable) blue else gray6,
+            textAlign = textAlign
+        ),
         modifier = Modifier
-            .fillMaxWidth()
-            .weight(33.3f)
             .padding(
                 start = 17.dp,
                 end = 17.dp
             )
-            .selectable(false, onClick = {}),
-        colors = CardColors(
-            containerColor = white,
-            contentColor = blue,
-            disabledContentColor = gray6,
-            disabledContainerColor = white
-        ),
-        shape = RoundedCornerShape(0.dp),
-        enabled = enable
-    ) {
-        Text(
-            text = title,
-            style = TextStyle(
-                fontSize = 16.sp,
-                lineHeight = 20.sp,
-                fontFamily = FontFamily(
-                    Font(R.font.roboto)
-                ),
-                fontWeight = FontWeight.Medium,
-                letterSpacing = 0.25.sp,
-                color = if (enable) blue else gray6,
-                textAlign = textAlign
-            ),
-            modifier = Modifier
-                .fillMaxWidth()
-        )
-    }
+            .clickable(
+                onClick = onClick,
+                enabled = enable
+            )
+            .weight(33.3f)
+    )
 }
 
 @Composable
@@ -209,7 +213,7 @@ fun Category(title: String, list: List<Category>) {
                     color = black
                 )
             )
-            val selectedIndexed = remember { mutableIntStateOf(-1) }
+            val selectedIndexed = remember { mutableLongStateOf(0) }
 
             LazyRow(
                 content = {
@@ -217,9 +221,10 @@ fun Category(title: String, list: List<Category>) {
                         ItemCategory(
                             category = item,
                             onClick = {
-                                selectedIndexed.intValue = if (selectedIndexed.intValue == item.id) -1 else item.id
+                                selectedIndexed.longValue = if (selectedIndexed.longValue == item.id) item.id else item.id
+                                State.currentSelect.value.category = item
                             },
-                            selected = selectedIndexed.intValue == item.id
+                            selected = selectedIndexed.longValue == item.id
                         )
                     }
                 },
@@ -241,8 +246,7 @@ fun ItemCategory(
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(
-            space = 8.dp,
-            alignment = Alignment.CenterVertically
+            space = 8.dp
         ),
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
@@ -250,10 +254,27 @@ fun ItemCategory(
                 onClick = onClick
             )
     ) {
-        Image(
-            painter = painterResource(id = category.icon),
-            contentDescription = null
-        )
+        Box(
+            contentAlignment = Alignment.TopEnd
+        ) {
+
+            Image(
+                painter = painterResource(id = category.icon),
+                contentDescription = null
+            )
+            if (selected) {
+                Image(
+                    painter = painterResource(id = R.drawable.select),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .offset(
+                            x = 6.dp,
+                            y = (-4).dp
+                        )
+                )
+            }
+        }
+
 
         Text(
             text = category.title,
@@ -273,7 +294,7 @@ fun ItemCategory(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun textInput(title: String, hint: String): String {
+fun textInput(title: String, hint: String, keyboardType: KeyboardType): String {
     val text = remember { mutableStateOf("") }
 
     Column(
@@ -335,7 +356,10 @@ fun textInput(title: String, hint: String): String {
                 shape = RoundedCornerShape(12.dp),
                 suffix = {
 
-                }
+                },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = keyboardType
+                )
             )
         }
     )
