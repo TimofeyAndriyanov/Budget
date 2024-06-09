@@ -110,20 +110,15 @@ fun DropdownMenu(
     visibly: Boolean,
     onDismissRequest: () -> Unit,
     items: @Composable (ColumnScope.() -> Unit)
-) =
-    DropdownMenu(
+) = DropdownMenu(
         expanded = visibly,
         onDismissRequest = onDismissRequest,
         content = items,
         modifier = Modifier
-            .width(125.dp),
-            //.background(
-            //    color = white,
-            //    shape = RoundedCornerShape(12.dp)
-            //)
-        properties = PopupProperties(
-
-        )
+            .width(125.dp)
+            .background(
+                color = white
+            )
     )
 
 @Composable

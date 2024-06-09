@@ -22,6 +22,7 @@ fun PrimaryScreenPreview() = PrimaryScreen()
 @Composable
 fun PrimaryScreen() {
     val navigationController = rememberNavController()
+
     Scaffold(
         bottomBar = {
             BottomNavigation(

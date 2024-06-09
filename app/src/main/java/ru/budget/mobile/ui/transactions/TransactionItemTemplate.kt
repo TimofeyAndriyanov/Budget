@@ -39,79 +39,65 @@ fun TransactionItemTemplatePreview() =
 fun TransactionItemTemplate(
     transaction: Transaction
 ) {
-    Card(
+    Row(
         content = {
-            Row(
-                content = {
-                    Image(
-                        painter = painterResource(
-                            if (transaction.type == TransactionType.CONSUMPTION) transaction.category.category.icon else R.drawable.salary
-                        ),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .padding(
-                                end = 16.dp
-                            )
-                    )
-
-                    TextTemplate(
-                        text = if (transaction.type == TransactionType.CONSUMPTION) transaction.title else "Зарплата",
-                        fontWeight = FontWeight.Medium,
-                        fontSize = 14.sp,
-                        visibly = true
-                    )
-
-                    TextTemplate(
-                        text = "·",
-                        fontWeight = FontWeight.Normal,
-                        fontSize = 12.sp,
-                        modifier = Modifier
-                            .padding(
-                                start = 8.dp,
-                                end = 8.dp
-                            ),
-                        visibly = transaction.type == TransactionType.CONSUMPTION
-                    )
-
-                    TextTemplate(
-                        text = transaction.category.category.title,
-                        fontWeight = FontWeight.Normal,
-                        fontSize = 12.sp,
-                        visibly = transaction.type == TransactionType.CONSUMPTION
-                    )
-                    val char = if (transaction.type == TransactionType.CONSUMPTION) "-" else "+"
-
-                    TextTemplate(
-                        text = "$char${transaction.sum} ₽",
-                        fontWeight = FontWeight.Normal,
-                        fontSize = 14.sp,
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        textAlign = TextAlign.End,
-                        visibly = true
-                    )
-                },
-                verticalAlignment = Alignment.CenterVertically,
-
+            Image(
+                painter = painterResource(
+                    if (transaction.type == TransactionType.CONSUMPTION) transaction.category.category.icon else R.drawable.salary
+                ),
+                contentDescription = null,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight()
                     .padding(
-                        start = 16.dp,
                         end = 16.dp
                     )
             )
+
+            TextTemplate(
+                text = if (transaction.type == TransactionType.CONSUMPTION) transaction.title else "Зарплата",
+                fontWeight = FontWeight.Medium,
+                fontSize = 14.sp,
+                visibly = true
+            )
+
+            TextTemplate(
+                text = "·",
+                fontWeight = FontWeight.Normal,
+                fontSize = 12.sp,
+                modifier = Modifier
+                    .padding(
+                        start = 8.dp,
+                        end = 8.dp
+                    ),
+                visibly = transaction.type == TransactionType.CONSUMPTION
+            )
+
+            TextTemplate(
+                text = transaction.category.category.title,
+                fontWeight = FontWeight.Normal,
+                fontSize = 12.sp,
+                visibly = transaction.type == TransactionType.CONSUMPTION
+            )
+            val char = if (transaction.type == TransactionType.CONSUMPTION) "-" else "+"
+
+            TextTemplate(
+                text = "$char${transaction.sum} ₽",
+                fontWeight = FontWeight.Normal,
+                fontSize = 14.sp,
+                modifier = Modifier
+                    .fillMaxWidth(),
+                textAlign = TextAlign.End,
+                visibly = true
+            )
         },
+        verticalAlignment = Alignment.CenterVertically,
+
         modifier = Modifier
             .fillMaxWidth()
-            .height(68.dp),
-        shape = RoundedCornerShape(0.dp),
-        colors = CardColors(
-            containerColor = white,
-            contentColor = black,
-            disabledContainerColor = white,
-            disabledContentColor = black
-        )
+            .height(68.dp)
+            .padding(
+                start = 16.dp,
+                end = 16.dp
+            )
     )
 }
 
@@ -123,23 +109,20 @@ fun TextTemplate(
     modifier: Modifier = Modifier,
     textAlign: TextAlign = TextAlign.Center,
     visibly: Boolean
-) {
-    AnimatedVisibility(visible = visibly) {
-        Text(
-            text = text,
-            style = TextStyle(
-                fontSize = fontSize,
-                lineHeight = 20.sp,
-                fontFamily = FontFamily(
-                    Font(R.font.roboto)
-                ),
-                fontWeight = fontWeight,
-                color = black,
-                letterSpacing = 0.1.sp,
-                textAlign = textAlign
+) = if (visibly) {
+    Text(
+        text = text,
+        style = TextStyle(
+            fontSize = fontSize,
+            lineHeight = 20.sp,
+            fontFamily = FontFamily(
+                Font(R.font.roboto)
             ),
-            modifier = modifier
-        )
-    }
-
-}
+            fontWeight = fontWeight,
+            color = black,
+            letterSpacing = 0.1.sp,
+            textAlign = textAlign
+        ),
+        modifier = modifier
+    )
+} else null

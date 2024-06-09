@@ -1,6 +1,7 @@
 package ru.budget.mobile.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
@@ -24,28 +25,25 @@ import androidx.compose.ui.unit.sp
 import ru.budget.mobile.R
 import ru.budget.mobile.ui.theme.black
 import ru.budget.mobile.ui.theme.blue
+import ru.budget.mobile.ui.theme.gray1
 import ru.budget.mobile.ui.theme.white
 
 @Composable
 fun FAB(icon: Int, onClick: () -> Unit, visibly: Boolean) {
-    AnimatedVisibility(
-        visible = visibly,
-        content = {
-            FloatingActionButton(
-                onClick = onClick,
-                content = {
-                    Icon(
-                        painter = painterResource(id = icon),
-                        contentDescription = null,
-                        tint = white
-                    )
-                },
-                containerColor = blue,
-                elevation = FloatingActionButtonDefaults.elevation(0.dp,0.dp)
-            )
-        }
-    )
-
+    if (visibly) {
+        FloatingActionButton(
+            onClick = onClick,
+            content = {
+                Icon(
+                    painter = painterResource(id = icon),
+                    contentDescription = null,
+                    tint = white
+                )
+            },
+            containerColor = blue,
+            elevation = FloatingActionButtonDefaults.elevation(0.dp,0.dp)
+        )
+    }
 }
 
 @Composable
@@ -103,6 +101,10 @@ fun CardText(text: String) {
                 )
             )
         },
-        shape = RoundedCornerShape(8.dp)
+        shape = RoundedCornerShape(8.dp),
+        border = BorderStroke(
+            width = 1.dp,
+            color = gray1
+        )
     )
 }
